@@ -25,21 +25,34 @@ lazy val buildSettings = Seq(
   version := "$version$-SNAPSHOT"
 )
 
-lazy val catsVersion = "0.9.0"
-
 lazy val commonSettings = Seq(
-  resolvers := commonResolvers,
+  resolvers ++= commonResolvers,
   libraryDependencies ++= Seq(
-    "org.typelevel" %% "cats-core" % catsVersion,
-    "org.typelevel" %% "cats-free" % catsVersion,
-    "com.chuusai" %% "shapeless" % "2.3.2",
-
-    "org.scalatest" %% "scalatest" % "3.0.1" % "test",
-    "org.scalacheck" %% "scalacheck" % "1.13.4" % "test"
   )
 ) ++ compilerSettings
+
+lazy val core = project.in(file("core"))
+  .settings(commonSettings)
+  .settings(buildSettings)
+  .settings(name := "$name$-core")
+
+lazy val docs = project.in(file("docs"))
+  .settings(buildSettings)
+  .settings(commonSettings)
+  .settings(name := "$name$-docs")
+  .dependsOn(core)
+  .enablePlugins(MicrositesPlugin)
+  .settings(
+    micrositeName             := "$name$",
+    micrositeDescription      := "Add a description",
+    micrositeAuthor           := "zainab-ali",
+    micrositeGithubOwner      := "zainab-ali",
+    micrositeGithubRepo       := "$name$",
+    micrositeBaseUrl          := "/$name$",
+    git.remoteRepo := "git@github.com:zainab-ali/$name$.git",
+    autoAPIMappings := true)
 
 lazy val root = (project in file(".")).settings(
   buildSettings,
   commonSettings
-)
+).aggregate(core, docs)
